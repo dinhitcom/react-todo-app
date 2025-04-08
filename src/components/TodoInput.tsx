@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MdAddTask, MdClear } from "react-icons/md";
 
 type TodoInputProps = {
@@ -11,6 +11,10 @@ export function TodoInput(props: Readonly<TodoInputProps>) {
   const [error, setError] = useState<string | undefined>();
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(()=> {
+    inputRef.current?.focus();
+  }, [])
+
   return (
     <div className="flex w-full items-start space-x-1">
       <div className="flex-1">
@@ -21,11 +25,12 @@ export function TodoInput(props: Readonly<TodoInputProps>) {
             title={text}
             ref={inputRef}
             placeholder="Add your new task here."
+            aria-label="New task input"
+            aria-invalid={!!error}
+            aria-describedby={error ? "input-error" : undefined}
             onChange={(e) => {
               const value = e.target.value;
-
               setText(value);
-
               if (value) {
                 setError("");
               }
@@ -34,25 +39,33 @@ export function TodoInput(props: Readonly<TodoInputProps>) {
               if (e.key === "Enter") {
                 createTask();
               }
+              if (e.key === "Escape") {
+                clearInput();
+              }
             }}
-          ></input>
+          />
           {text && (
             <button
               type="button"
+              aria-label="Clear input"
               className="absolute top-1/2 right-2 -translate-y-1/2 text-gray-500 hover:cursor-pointer hover:text-gray-700"
-              onClick={() => setText("")}
+              onClick={clearInput}
             >
               <MdClear />
             </button>
           )}
         </div>
         {error && (
-          <p className="mt-1 text-sm font-medium text-red-500">{error}</p>
+          <p id="input-error" role="alert" className="mt-1 text-sm font-medium text-red-500">
+            {error}
+          </p>
         )}
       </div>
       <button
+        type="button"
+        aria-label="Add task"
         className="h-9 rounded-md bg-blue-600 px-4 py-1 text-gray-200 hover:cursor-pointer hover:bg-blue-700"
-        onClick={() => createTask()}
+        onClick={createTask}
       >
         <MdAddTask />
       </button>
@@ -60,13 +73,19 @@ export function TodoInput(props: Readonly<TodoInputProps>) {
   );
 
   function createTask() {
-    if (!text) {
+    if (!text.trim()) {
       setError("Please fill the task content.");
-      inputRef.current?.focus();
+      setTimeout(() => inputRef.current?.focus(), 0);
       return;
     }
-
-    onCreate(text);
+    onCreate(text.trim());
     setText("");
+    setError("");
+  }
+
+  function clearInput() {
+    setText("");
+    setError("");
+    inputRef.current?.focus();
   }
 }
