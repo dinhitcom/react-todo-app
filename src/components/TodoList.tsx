@@ -97,9 +97,7 @@ export function TodoList() {
   }
 
   function clearAllTasks() {
-    if (confirm("Are you sure you want to clear all tasks?")) {
       setTasks([]);
       localStorage.removeItem("tasks");
-    }
   }
 }

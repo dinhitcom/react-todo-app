@@ -93,7 +93,15 @@ export function TodoItem(props: Readonly<TodoItemProps>) {
             className={`block truncate ${task.completed ? "text-gray-400 line-through" : ""}`}
             title={text}
             tabIndex={0}
-            aria-live="polite"
+            role="button" 
+            aria-pressed={task.completed} 
+            onClick={() => onToggle(task.id)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onToggle(task.id);
+              }
+            }}
           >
             {text}
           </span>
