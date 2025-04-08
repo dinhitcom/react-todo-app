@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { MdAddTask } from "react-icons/md";
+import { MdAddTask, MdClear } from "react-icons/md";
 
 type TodoInputProps = {
   onCreate: (text: string) => void;
@@ -12,27 +12,37 @@ export function TodoInput(props: Readonly<TodoInputProps>) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex items-start space-x-1">
-      <div className="">
-        <input
-          className={`h-9 rounded-md border p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${error ? "ring-2 ring-red-500 focus:ring-red-500" : ""}`}
-          value={text}
-          ref={inputRef}
-          onChange={(e) => {
-            const value = e.target.value;
+    <div className="flex w-full items-start space-x-1">
+      <div className="flex-1">
+        <div className="relative w-full">
+          <input
+            className={`h-9 w-full rounded-md border p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${error ? "ring-2 ring-red-500 focus:ring-red-500" : ""}`}
+            value={text}
+            title={text}
+            ref={inputRef}
+            onChange={(e) => {
+              const value = e.target.value;
 
-            setText(value);
+              setText(value);
 
-            if (value) {
-              setError("");
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              createTask((e.target as HTMLInputElement).value);
-            }
-          }}
-        ></input>
+              if (value) {
+                setError("");
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                createTask((e.target as HTMLInputElement).value);
+              }
+            }}
+          ></input>
+          <button
+            type="button"
+            className="absolute top-1/2 right-2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            onClick={() => setText("")}
+          >
+            <MdClear />
+          </button>
+        </div>
         {error && (
           <p className="mt-1 text-sm font-medium text-red-500">{error}</p>
         )}

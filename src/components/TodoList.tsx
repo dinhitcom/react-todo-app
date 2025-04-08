@@ -25,10 +25,10 @@ export function TodoList() {
   const [tasks, setTasks] = useState(initialTasks);
 
   return (
-    <div className="">
+    <div className="shadow-lg px-8 py-4 w-1/3 bg-white rounded">
       <h2 className="text-center py-2 my-2 text-2xl font-semibold text-gray-700">Todo List</h2>
       <TodoInput onCreate={createTask} />
-      <ul role="list">
+      <ul role="list" className="my-4">
         {tasks.map((task) => {
           return (
             <li className="my-1.5">
