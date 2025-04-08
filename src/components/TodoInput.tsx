@@ -20,6 +20,7 @@ export function TodoInput(props: Readonly<TodoInputProps>) {
             value={text}
             title={text}
             ref={inputRef}
+            placeholder="Add your new task here."
             onChange={(e) => {
               const value = e.target.value;
 
@@ -31,17 +32,19 @@ export function TodoInput(props: Readonly<TodoInputProps>) {
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                createTask((e.target as HTMLInputElement).value);
+                createTask();
               }
             }}
           ></input>
-          <button
-            type="button"
-            className="absolute top-1/2 right-2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-            onClick={() => setText("")}
-          >
-            <MdClear />
-          </button>
+          {text && (
+            <button
+              type="button"
+              className="absolute top-1/2 right-2 -translate-y-1/2 text-gray-500 hover:cursor-pointer hover:text-gray-700"
+              onClick={() => setText("")}
+            >
+              <MdClear />
+            </button>
+          )}
         </div>
         {error && (
           <p className="mt-1 text-sm font-medium text-red-500">{error}</p>
@@ -49,14 +52,14 @@ export function TodoInput(props: Readonly<TodoInputProps>) {
       </div>
       <button
         className="h-9 rounded-md bg-blue-600 px-4 py-1 text-gray-200 hover:cursor-pointer hover:bg-blue-700"
-        onClick={() => createTask(text)}
+        onClick={() => createTask()}
       >
         <MdAddTask />
       </button>
     </div>
   );
 
-  function createTask(text: string) {
+  function createTask() {
     if (!text) {
       setError("Please fill the task content.");
       inputRef.current?.focus();
