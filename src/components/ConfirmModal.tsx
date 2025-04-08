@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 type ModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -13,6 +15,48 @@ export function ConfirmModal({
   title,
   description,
 }: ModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Trap focus inside modal
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const focusableElements = modalRef.current?.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+
+    const firstElement = focusableElements?.[0];
+    const lastElement = focusableElements?.[focusableElements.length - 1];
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+      if (e.key === "Tab" && focusableElements && focusableElements.length > 0) {
+        if (e.shiftKey) {
+          // Shift + Tab
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement?.focus();
+          }
+        } else {
+          // Tab
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement?.focus();
+          }
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    firstElement?.focus();
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
@@ -23,7 +67,10 @@ export function ConfirmModal({
       aria-labelledby="modal-title"
       aria-describedby="modal-description"
     >
-      <div className="rounded-lg bg-white p-6 shadow-lg w-11/12 max-w-md">
+      <div
+        ref={modalRef}
+        className="rounded-lg bg-white p-6 shadow-lg w-11/12 max-w-md"
+      >
         <h2 id="modal-title" className="text-lg font-semibold">
           {title}
         </h2>
