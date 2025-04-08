@@ -1,28 +1,27 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TodoInput } from "./TodoInput";
 import { Todo } from "../types";
 import { TodoItem } from "./TodoItem";
-
-const initialTasks: Todo[] = [
-  {
-    id: crypto.randomUUID(),
-    text: "Buy some milk",
-    completed: false,
-  },
-  {
-    id: crypto.randomUUID(),
-    text: "Walk the dog",
-    completed: false,
-  },
-  {
-    id: crypto.randomUUID(),
-    text: "Craft a space shuttle",
-    completed: true,
-  },
-];
+import { ConfirmModal } from "./ConfirmModal";
 
 export function TodoList() {
-  const [tasks, setTasks] = useState(initialTasks);
+  const [tasks, setTasks] = useState<Todo[]>(() => {
+    try {
+      const storedTasksValue = localStorage.getItem("tasks");
+      if (storedTasksValue) {
+        const storedTasks = JSON.parse(storedTasksValue);
+        return Array.isArray(storedTasks) ? storedTasks : [];
+      }
+    } catch (error) {
+      console.error("Failed to parse tasks from localStorage", error);
+    }
+    return [];
+  });
+  const [isClearAllModalOpen, setIsClearAllModalOpen] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [tasks]);
 
   return (
     <div className="w-full rounded bg-white px-8 py-4 shadow-lg sm:w-10/12 md:w-9/12 lg:w-8/12 xl:w-1/2">
@@ -45,6 +44,25 @@ export function TodoList() {
             </li>
           ))}
         </ul>
+      )}
+      {tasks.length > 0 && (
+        <>
+          <ConfirmModal
+            isOpen={isClearAllModalOpen}
+            onClose={() => setIsClearAllModalOpen(false)}
+            onConfirm={clearAllTasks}
+            title="Clear All Tasks?"
+            description="Are you sure you want to delete all your tasks? This action cannot be undone."
+          />
+          <button
+            className="float-end rounded bg-red-500 px-4 py-2 text-sm text-white shadow-md transition hover:bg-red-600"
+            aria-label="Clear all tasks"
+            title="Clear all tasks"
+            onClick={() => setIsClearAllModalOpen(true)}
+          >
+            Clear All
+          </button>
+        </>
       )}
     </div>
   );
@@ -76,5 +94,12 @@ export function TodoList() {
 
   function deleteTask(id: string) {
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+  }
+
+  function clearAllTasks() {
+    if (confirm("Are you sure you want to clear all tasks?")) {
+      setTasks([]);
+      localStorage.removeItem("tasks");
+    }
   }
 }
