@@ -1,27 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { TodoInput } from "./TodoInput";
-import { Todo } from "../types";
 import { TodoItem } from "./TodoItem";
 import { ConfirmModal } from "./ConfirmModal";
+import { useTodoStore } from "../stores/useTodoStore";
 
 export function TodoList() {
-  const [tasks, setTasks] = useState<Todo[]>(() => {
-    try {
-      const storedTasksValue = localStorage.getItem("tasks");
-      if (storedTasksValue) {
-        const storedTasks = JSON.parse(storedTasksValue);
-        return Array.isArray(storedTasks) ? storedTasks : [];
-      }
-    } catch (error) {
-      console.error("Failed to parse tasks from localStorage", error);
-    }
-    return [];
-  });
+  const {tasks, createTask, toggleTask, updateTask, deleteTask, clearAllTasks} = useTodoStore();
   const [isClearAllModalOpen, setIsClearAllModalOpen] = useState(false);
-
-  useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
 
   return (
     <div className="w-full rounded bg-white px-8 py-4 shadow-lg sm:w-10/12 md:w-9/12 lg:w-8/12 xl:w-1/2">
@@ -66,38 +51,4 @@ export function TodoList() {
       )}
     </div>
   );
-
-  function createTask(text: string) {
-    const newTask: Todo = {
-      id: crypto.randomUUID(),
-      text: text,
-      completed: false,
-    };
-    setTasks((prevTasks) => [newTask, ...prevTasks]);
-  }
-
-  function toggleTask(id: string) {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task,
-      ),
-    );
-  }
-
-  function updateTask(id: string, newText: string) {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === id ? { ...task, text: newText } : task,
-      ),
-    );
-  }
-
-  function deleteTask(id: string) {
-    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
-  }
-
-  function clearAllTasks() {
-      setTasks([]);
-      localStorage.removeItem("tasks");
-  }
 }
